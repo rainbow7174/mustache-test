@@ -31,11 +31,15 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	public void update(User newUser) {
+		this.password = newUser.password;
+		this.username = newUser.username;
+		this.email = newUser.email;
+	}
 	
 	@Override
 	public String toString() {
 		return "User [userid=" + userid + ", password=" + password + ", username=" + username + ", email=" + email
 				+ "]";
 	}
-	
 }
