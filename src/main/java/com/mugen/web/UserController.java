@@ -1,5 +1,7 @@
 package com.mugen.web;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +38,30 @@ public class UserController {
 //		return "list";
 //	}
 	
+	@GetMapping("/loginForm")
+	public String loginForm() {
+		return "user/login";
+	}
+	
+	@PostMapping("/login")
+	public String login(String userid, String password, HttpSession session) {
+		User user = userRepo.findByUserid(userid);
+		
+		if(user == null) {
+			System.out.println("login Failure : 없는 사용자");
+			return "redirect:/users/loginForm";
+		}
+		
+		if(!password.equals(user.getPassword())) {
+			System.out.println("login Failure : 암호 틀림");
+			return "redirect:/users/loginForm";
+		}
+		
+		System.out.println("login Success!!");
+		session.setAttribute("user", user);
+		return "redirect:/";
+	}
+	
 	@GetMapping("/form")
 	public String form() {
 		return "user/form";
@@ -66,4 +92,5 @@ public class UserController {
 		userRepo.save(user);
 		return "redirect:/users";
 	}
+
 }
