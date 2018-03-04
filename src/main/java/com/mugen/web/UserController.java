@@ -1,6 +1,5 @@
 package com.mugen.web;
 
-import javax.jms.IllegalStateException;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mugen.domain.User;
 import com.mugen.domain.UserRepository;
+import com.mugen.utils.HttpSessionUtils;
 
 @Controller
 @RequestMapping("/users")
@@ -53,19 +53,19 @@ public class UserController {
 			return "redirect:/users/loginForm";
 		}
 		
-		if(!password.equals(user.getPassword())) {
+		if(!user.matchPassword(password)) {
 			System.out.println("login Failure : 암호 틀림");
 			return "redirect:/users/loginForm";
 		}
 		
 		System.out.println("login Success!!");
-		session.setAttribute("sessionedUser", user);
+		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
 		return "redirect:/";
 	}
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		session.removeAttribute("sessionedUser");
+		session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		return "redirect:/";
 	}
 	
@@ -88,17 +88,14 @@ public class UserController {
 	
 	@GetMapping("/{id}/form")
 	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-		messageWarning(session, id);
-//		Object tempUser = session.getAttribute("sessionedUser");
-//		
-//		if(tempUser == null) {
-//			return "redirect:/users/loginForm";
-//		}
-//		
-//		User sessionedUser = (User)tempUser;
-//		if(!id.equals(sessionedUser.getId())) {
-//			throw new IllegalStateException("Warning : You cannot update another user's information.");
-//		}
+		if(!HttpSessionUtils.isLoginUser(session)){
+			return "redirect:/users/loginForm";
+		}
+		
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		if(!sessionedUser.matchId(id)) {
+			throw new IllegalStateException("Warning : You cannot update another user's information.");
+		}
 		
 		model.addAttribute("user", userRepo.findOne(id));
 		return "user/updateForm";
@@ -106,36 +103,19 @@ public class UserController {
 	
 	@PutMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
-		messageWarning(session, id);
-//		Object tempUser = session.getAttribute("sessionedUser");
-//		
-//		if(tempUser == null) {
-//			return "redirect:/users/loginForm";
-//		}
-//		
-//		User sessionedUser = (User)tempUser;
-//		if(!id.equals(sessionedUser.getId())) {
-//			throw new IllegalStateException("Warning : You cannot update another user's information.");
-//		}
+		if(HttpSessionUtils.isLoginUser(session)) {
+			return "redirect:/users/loginForm";
+		}
+		
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		if(!sessionedUser.matchId(id)) {
+			throw new IllegalStateException("Warning : You cannot update another user's information.");
+		}
 		
 		User user = userRepo.findOne(id);
 		user.update(updatedUser);
 		userRepo.save(user);
 		return "redirect:/users";
 	}
-	
-	public String messageWarning(HttpSession session, Long id) {
-		Object tempUser = session.getAttribute("sessionedUser");
-		
-		if(tempUser == null) {
-			return "redirect:/users/loginForm";
-		}
-		
-		User sessionedUser = (User)tempUser;
-		if(!id.equals(sessionedUser.getId())) {
-			throw new IllegalStateException("Warning : You cannot update another user's information.");
-		}
-		
-		return "";
-	}
+
 }
