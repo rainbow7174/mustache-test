@@ -1,5 +1,6 @@
 package com.mugen.web;
 
+import javax.jms.IllegalStateException;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,13 @@ public class UserController {
 		}
 		
 		System.out.println("login Success!!");
-		session.setAttribute("user", user);
+		session.setAttribute("sessionedUser", user);
+		return "redirect:/";
+	}
+	
+	@GetMapping("/logout")
+	public String logout(HttpSession session) {
+		session.removeAttribute("sessionedUser");
 		return "redirect:/";
 	}
 	
@@ -80,17 +87,55 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}/form")
-	public String updateForm(@PathVariable Long id, Model model) {
+	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
+		messageWarning(session, id);
+//		Object tempUser = session.getAttribute("sessionedUser");
+//		
+//		if(tempUser == null) {
+//			return "redirect:/users/loginForm";
+//		}
+//		
+//		User sessionedUser = (User)tempUser;
+//		if(!id.equals(sessionedUser.getId())) {
+//			throw new IllegalStateException("Warning : You cannot update another user's information.");
+//		}
+		
 		model.addAttribute("user", userRepo.findOne(id));
 		return "user/updateForm";
 	}
 	
 	@PutMapping("/{id}")
-	public String update(@PathVariable Long id, User newUser) {
+	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
+		messageWarning(session, id);
+//		Object tempUser = session.getAttribute("sessionedUser");
+//		
+//		if(tempUser == null) {
+//			return "redirect:/users/loginForm";
+//		}
+//		
+//		User sessionedUser = (User)tempUser;
+//		if(!id.equals(sessionedUser.getId())) {
+//			throw new IllegalStateException("Warning : You cannot update another user's information.");
+//		}
+		
 		User user = userRepo.findOne(id);
-		user.update(newUser);
+		user.update(updatedUser);
 		userRepo.save(user);
 		return "redirect:/users";
 	}
-
+	
+	public String messageWarning(HttpSession session, Long id) {
+		Object tempUser = session.getAttribute("sessionedUser");
+		
+		if(tempUser == null) {
+			return "redirect:/users/loginForm";
+		}
+		
+		User sessionedUser = (User)tempUser;
+		if(!id.equals(sessionedUser.getId())) {
+			throw new IllegalStateException("Warning : You cannot update another user's information.");
+		}
+		
+		return "";
+	}
 }
