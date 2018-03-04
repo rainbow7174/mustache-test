@@ -103,7 +103,7 @@ public class UserController {
 	
 	@PutMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
-		if(HttpSessionUtils.isLoginUser(session)) {
+		if(!HttpSessionUtils.isLoginUser(session)) {
 			return "redirect:/users/loginForm";
 		}
 		
@@ -115,7 +115,7 @@ public class UserController {
 		User user = userRepo.findOne(id);
 		user.update(updatedUser);
 		userRepo.save(user);
-		return "redirect:/users";
+		return "redirect:/";
 	}
 
 }
