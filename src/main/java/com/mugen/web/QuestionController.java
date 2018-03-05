@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mugen.domain.Question;
 import com.mugen.domain.QuestionRepository;
+import com.mugen.domain.Result;
 import com.mugen.domain.User;
 import com.mugen.utils.HttpSessionUtils;
 
@@ -50,51 +51,61 @@ public class QuestionController {
 		return "qna/show";
 	}
 	
+	private Result valid(HttpSession session, Question question) {
+		if(!HttpSessionUtils.isLoginUser(session)) {
+			return Result.fail("로그인이 필요합니다.");
+		}
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		if(!question.isSameWriter(loginUser)) {
+			return Result.fail("자신이 쓴 글만 수정, 삭제가 가능합니다.");
+		}
+		return Result.ok();
+	}
+	
+//	private boolean hasPermission(HttpSession session, Question question) {
+//		if(!HttpSessionUtils.isLoginUser(session)) {
+//			throw new IllegalStateException("로그인이 필요합니다.");
+//		}
+//		User loginUser = HttpSessionUtils.getUserFromSession(session);
+//		if(!question.isSameWriter(loginUser)) {
+//			throw new IllegalStateException("자신이 쓴 글만 수정, 삭제가 가능합니다.");
+//		}
+//		return true;
+//	}
+	
 	@GetMapping("/{id}/form")
 	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-		if(!HttpSessionUtils.isLoginUser(session)) {
-			return "redirect:/users/loginForm";
-		}
-		
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
 		Question question = questionRepo.findOne(id);
-		if(!question.isSameWriter(loginUser)) {
-			return "redirect:/users/loginForm";
+		Result result = valid(session, question);
+		if(!result.isValid()) {
+			model.addAttribute("errorMessage", result.getErrorMessage());
+			return "/user/login";
 		}
-				
-		model.addAttribute("question", questionRepo.findOne(id));
+		model.addAttribute("question", question);
 		return "qna/updateForm";
 	}
 	
 	@PutMapping("/{id}")
-	public String update(@PathVariable Long id, String title, String contents, HttpSession session) {
-		if(!HttpSessionUtils.isLoginUser(session)) {
-			return "redirect:/users/loginForm";
-		}
-		
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
+	public String update(@PathVariable Long id, String title, String contents, Model model, HttpSession session) {
 		Question question = questionRepo.findOne(id);
-		if(!question.isSameWriter(loginUser)) {
-			return "redirect:/users/loginForm";
+		Result result = valid(session, question);
+		if(!result.isValid()) {
+			model.addAttribute("errorMessage", result.getErrorMessage());
+			return "/user/login";
 		}
-		
 		question.update(title, contents);
 		questionRepo.save(question);
 		return String.format("redirect:/questions/%d", id);
 	}
 	
 	@DeleteMapping("/{id}")
-	public String delete(@PathVariable Long id, HttpSession session) {
-		if(!HttpSessionUtils.isLoginUser(session)) {
-			return "redirect:/users/loginForm";
-		}
-		
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
+	public String delete(@PathVariable Long id, Model model, HttpSession session) {
 		Question question = questionRepo.findOne(id);
-		if(!question.isSameWriter(loginUser)) {
-			return "redirect:/users/loginForm";
+		Result result = valid(session, question);
+		if(!result.isValid()) {
+			model.addAttribute("errorMessage", result.getErrorMessage());
+			return "/user/login";
 		}
-		
 		questionRepo.delete(id);
 		return "redirect:/";
 	}

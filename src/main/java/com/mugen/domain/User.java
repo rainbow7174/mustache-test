@@ -56,6 +56,7 @@ public class User {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -72,6 +73,7 @@ public class User {
 			return false;
 		return true;
 	}
+	
 	@Override
 	public String toString() {
 		return "User [userid=" + userid + ", password=" + password + ", username=" + username + ", email=" + email

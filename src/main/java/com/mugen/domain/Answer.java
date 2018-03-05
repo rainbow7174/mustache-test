@@ -2,7 +2,6 @@ package com.mugen.domain;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -11,37 +10,33 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 
 @Entity
-public class Question {
+public class Answer {
 	
 	@Id
 	@GeneratedValue
-	private Long questionId;
+	private Long answerId;
 	
 	@ManyToOne
-	@JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
+	@JoinColumn(foreignKey = @ForeignKey(name = "fk_answer_writer"))
 	private User writer;
 	
-	@OneToMany(mappedBy="question")
-	@OrderBy("answerId ASC")
-	private List<Answer> answers;
+	@ManyToOne
+	@JoinColumn(foreignKey = @ForeignKey(name = "fk_answer_question"))
+	private Question question;
 	
-	private String title;
 	@Lob
 	private String contents;
 	private LocalDateTime createDate;
 	
-	public Question() {}
+	public Answer() {}
 	
-	public Question(User writer, String title, String contents) {
-		super();
+	public Answer(User writer, Question question, String contents) {
 		this.writer = writer;
-		this.title = title;
+		this.question = question;
 		this.contents = contents;
-		this.createDate = LocalDateTime.now();
+		this.createDate =  LocalDateTime.now();
 	}
 	
 	public String getFormattedCreateDate() {
@@ -49,20 +44,11 @@ public class Question {
 		return createDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 	}
 
-	public void update(String title, String contents) {
-		this.title = title;
-		this.contents = contents;
-	}
-
-	public boolean isSameWriter(User loginUser) {
-		return this.writer.equals(loginUser);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((questionId == null) ? 0 : questionId.hashCode());
+		result = prime * result + ((answerId == null) ? 0 : answerId.hashCode());
 		return result;
 	}
 
@@ -74,18 +60,18 @@ public class Question {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Question other = (Question) obj;
-		if (questionId == null) {
-			if (other.questionId != null)
+		Answer other = (Answer) obj;
+		if (answerId == null) {
+			if (other.answerId != null)
 				return false;
-		} else if (!questionId.equals(other.questionId))
+		} else if (!answerId.equals(other.answerId))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Question [questionId=" + questionId + ", writer=" + writer + ", title=" + title + ", contents="
+		return "Answer [answerId=" + answerId + ", writer=" + writer + ", question=" + question + ", contents="
 				+ contents + ", createDate=" + createDate + "]";
 	}
 }
