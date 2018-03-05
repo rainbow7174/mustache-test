@@ -15,7 +15,7 @@ public class Question {
 	
 	@Id
 	@GeneratedValue
-	private Long Id;
+	private Long questionId;
 	
 	@ManyToOne
 	@JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
