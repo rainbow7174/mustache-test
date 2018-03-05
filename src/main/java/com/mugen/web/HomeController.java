@@ -18,5 +18,4 @@ public class HomeController {
 		model.addAttribute("question", questionRepo.findAll());
 		return "index";
 	}
-	
 }
