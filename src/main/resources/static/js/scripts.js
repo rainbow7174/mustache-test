@@ -27,9 +27,9 @@ $(".answer-write input[type=submit]").click(function (e) {
 		success: function(data, status) {
 //			console.log(data);
 			var answerTemplate = $("#answerTemplate").html();
-			console.log("questionId : "+data.question.questionId);
-			console.log("answerId : "+data.answerId);
-			var template = answerTemplate.format(data.writer.userid, data.formattedCreateDate, data.contents, data.question.questionId, data.answerId);
+//			console.log("questionId : "+data.question.id);
+//			console.log("answerId : "+data.id);
+			var template = answerTemplate.format(data.writer.userid, data.formattedCreateDate, data.contents, data.question.id, data.id);
 			$(".qna-comment-slipp-articles").prepend(template);
 			$(".answer-write textarea[name=contents]").val("");
 		},
