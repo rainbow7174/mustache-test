@@ -40,6 +40,9 @@ public class Question {
 	@JsonProperty
 	private String contents;
 	
+	@JsonProperty
+	private Integer countOfAnswer = 0;
+	
 	private LocalDateTime createDate;
 	
 	public Question() {}
@@ -64,6 +67,14 @@ public class Question {
 
 	public boolean isSameWriter(User loginUser) {
 		return this.writer.equals(loginUser);
+	}
+	
+	public void addCountAnswer() {
+		this.countOfAnswer += 1;
+	}
+	
+	public void deleteCountAnswer() {
+		this.countOfAnswer -= 1;
 	}
 
 	@Override

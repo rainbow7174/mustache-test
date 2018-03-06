@@ -36,6 +36,10 @@ public class ApiAnswerController {
 		User loginUser = HttpSessionUtils.getUserFromSession(session);
 		Question question = questionRepo.findOne(questionId);
 		Answer answer = new Answer(loginUser, question, contents);
+		
+		question.addCountAnswer(); // 답변수 추가
+		questionRepo.save(question);
+		
 		return answerRepo.save(answer);
 	}
 	
@@ -52,6 +56,12 @@ public class ApiAnswerController {
 		}
 		
 		answerRepo.delete(answerId);
+		
+		// 답변 수 삭제
+		Question question = questionRepo.findOne(questionId);
+		question.deleteCountAnswer();
+		questionRepo.save(question);
+		
 		return Result.ok();
 	}
 }
