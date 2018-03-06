@@ -40,6 +40,10 @@
                 <li><a href="#"><i class="glyphicon glyphicon-cog" style="color:#dd1111;"></i> Settings</a></li>
             </ul>
             
+            {{#sessionedUser}}
+            <span style="padding-left:20px"><b>{{username}}</b> 님 환영합니다.</span>
+            {{/sessionedUser}}
+            
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse2">
             	<span class="sr-only">Toggle navigation</span>
             	<span class="icon-bar"></span>
